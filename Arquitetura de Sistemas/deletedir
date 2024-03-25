@@ -1,12 +1,6 @@
 #!/bin/bash
 
-ARG=$1
 SAMPFOLDIR='script_sample_folder'
-
-if [ ! $1 ]; then
-    echo "No argument provided. Please make sure to repeat and add the argument. Like this: bash $0 <argument>"
-    exit 1
-fi
 
 if [ ! -d "$SAMPFOLDIR" ]; then
     echo "Directory $SAMPFOLDIR does not exist"
@@ -26,15 +20,29 @@ if [ ! -d "$SAMPFOLDIR" ]; then
     fi
 fi
 
-for FOLDER in "$SAMPFOLDIR"/*; do
-  if [[ -d $FOLDER ]]; then
-    folderName=$(basename "$FOLDER")
-    if [[ "$folderName" == *"$ARG"* ]]; then
-      echo "Deleting contents of $folderName."
-      rm -rf "${FOLDER}"/*
-    fi
-  fi
-done
 
-echo "All content for subdirectories containing ${ARG} have been deleted successfuly. Thank you for using the script"
+deleteNonEmptyDirs() {
+    for dir in "$SAMPFOLDIR"/*; do
+        if [ -d "$dir" ] && [ "$(ls -A "$dir")" ]; then
+            echo "Deleting non-empty directory: $dir"
+            rm -rf "$dir"
+        fi
+    done
+}
 
+deleteAllDirs() {
+    for dir in "$SAMPFOLDIR"/*; do
+        if [ -d "$dir" ]; then
+            echo "Deleting directory: $dir"
+            rm -rf "$dir"
+        fi
+    done
+}
+
+if [ $# -eq 0 ]; then
+    deleteNonEmptyDirs
+elif [ "$1" = true ]; then
+    deleteAllDirs
+else
+    deleteNonEmptyDirs
+fi
